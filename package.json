@@ -1,0 +1,22 @@
+{
+  "name": "BIER-query",
+  "version": "0.1.0",
+  "description": "BIER-query",
+  "main": "hello-world-server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified! Configure in package.json\" && exit 1"
+  },
+  "repository": "",
+  "keywords": [
+    "Node.js",
+    "Eclipse",
+    "Nodeclipse"
+  ],
+  "author": "Tomo Simeonov",
+  "license": "BSD",
+  "readmeFilename": "README.md",
+  "dependencies": {
+    "simple-sql-parser": ">= 0.0.5",
+    "sqljs": "git://github.com/langpavel/node-sqljs.git"
+  }
+}
