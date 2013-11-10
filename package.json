@@ -18,7 +18,7 @@
   "dependencies": {
 	"async": "0.2.9",
 	"curry": "1.2.0",
-    "simple-sql-parser": ">= 0.0.5",
+    "simple-sql-parser": "git://github.com/EverettQuebral/simple-sql-parser",
     "sqljs": "git://github.com/langpavel/node-sqljs.git"
   }
 }
