@@ -1,0 +1,1 @@
+exports.QueryLayer = require("./lib/QueryLayer");

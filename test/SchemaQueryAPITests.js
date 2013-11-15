@@ -1,5 +1,5 @@
 /**
- * New node file
+ * Testing the query schema functionality
  */
 var schemaQueryAPi = require('../lib/SchemaQueryAPI');
 var extend = require('util')._extend;
