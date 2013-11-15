@@ -18,8 +18,8 @@
   "dependencies": {
 	"async": "0.2.9",
 	"curry": "1.2.0",
-    "simple-sql-parser": "git://github.com/EverettQuebral/simple-sql-parser",
-    "sqljs": "git://github.com/langpavel/node-sqljs.git",
+    "simple-sql-parser": "http://github.com/EverettQuebral/simple-sql-parser/tarball/master",
+    "sqljs": "http://github.com/langpavel/node-sqljs/tarball/master",
     "nodeunit": "0.8.2",
     "bier-storage": "http://github.com/agrigoroi/BIER-storage/tarball/master"
   }
