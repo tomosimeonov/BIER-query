@@ -1,7 +1,7 @@
 /**
  * Testing the query schema functionality
  */
-var schemaQueryAPi = require('../lib/SchemaQueryAPI');
+var schemaQueryAPi = require('../lib/SchemaManipulationFuncs');
 var extend = require('util')._extend;
 
 var tableName = 'persons';
@@ -117,12 +117,12 @@ exports.schemaValidation = {
 		var tempRealSchema = extend([], realSchema);
 		tempRealSchema.table = undefined;
 
-		schemaQueryAPi.isSchemaStructureCorrect(tempRealSchema, function(err, correct) {
+		schemaQueryAPi.isSatisfingSchemaStructure(tempRealSchema, function(err, correct) {
 			test.deepEqual(err, new Error(("No namespace provided.")), "Should throw error about missing namespace.");
 			test.equal(false, correct, "Should not validate schema.");
 
 			tempRealSchema.table = "";
-			schemaQueryAPi.isSchemaStructureCorrect(tempRealSchema, function(err, correct) {
+			schemaQueryAPi.isSatisfingSchemaStructure(tempRealSchema, function(err, correct) {
 				test.deepEqual(err, new Error(("No schema provided.")), "Should throw error about missing namespace.");
 				test.equal(false, correct, "Should not validate schema.");
 				test.done();
@@ -134,14 +134,14 @@ exports.schemaValidation = {
 		var tempRealSchema = extend([], realSchema);
 		tempRealSchema.properties = undefined;
 
-		schemaQueryAPi.isSchemaStructureCorrect(tempRealSchema,
+		schemaQueryAPi.isSatisfingSchemaStructure(tempRealSchema,
 				function(err, correct) {
 					test.deepEqual(err, new Error(("No properties provided.")),
 							"Should throw error about missing properties.");
 					test.equal(false, correct, "Should not validate schema.");
 
 					tempRealSchema.properties = [];
-					schemaQueryAPi.isSchemaStructureCorrect(tempRealSchema, function(err, correct) {
+					schemaQueryAPi.isSatisfingSchemaStructure(tempRealSchema, function(err, correct) {
 						test.deepEqual(err, new Error(("No properties provided.")),
 								"Should throw error about missing properties.");
 						test.equal(false, correct, "Should not validate schema.");
@@ -153,7 +153,7 @@ exports.schemaValidation = {
 	shouldReturnErrorWhenSchemaDoesHavePropertiesWithWrongFormat : function(test) {
 		var tempRealSchema = extend([], realSchema);
 		tempRealSchema.properties.wrong = {};
-		schemaQueryAPi.isSchemaStructureCorrect(tempRealSchema,
+		schemaQueryAPi.isSatisfingSchemaStructure(tempRealSchema,
 				function(err, correct) {
 					test.deepEqual(err, new Error("Property with wrong format."),
 							"Should throw error about wrong properties.");
@@ -166,21 +166,21 @@ exports.schemaValidation = {
 	shouldReturnErrorWhenSchemaDoesNotHavePrimaryKey : function(test) {
 		var tempRealSchema = extend([], realSchema);
 		tempRealSchema.primaryKey = undefined;
-		schemaQueryAPi.isSchemaStructureCorrect(tempRealSchema, function(err, correct) {
+		schemaQueryAPi.isSatisfingSchemaStructure(tempRealSchema, function(err, correct) {
 
 			test.deepEqual(err, new Error("No primary key or primary key not specified as property"),
 					"Should throw error about missing primary key.");
 			test.equal(false, correct, "Should not validate schema.");
 
 			tempRealSchema.primaryKey = "";
-			schemaQueryAPi.isSchemaStructureCorrect(tempRealSchema, function(err, correct) {
+			schemaQueryAPi.isSatisfingSchemaStructure(tempRealSchema, function(err, correct) {
 
 				test.deepEqual(err, new Error("No primary key or primary key not specified as property"),
 						"Should throw error about missing  primary key.");
 				test.equal(false, correct, "Should not validate schema.");
 
 				tempRealSchema.primaryKey = "no_id";
-				schemaQueryAPi.isSchemaStructureCorrect(tempRealSchema, function(err, correct) {
+				schemaQueryAPi.isSatisfingSchemaStructure(tempRealSchema, function(err, correct) {
 
 					test.deepEqual(err, new Error("No primary key or primary key not specified as property"),
 							"Should throw error about missing  primary key.");
@@ -194,7 +194,7 @@ exports.schemaValidation = {
 	shouldReturnErrorWhenSchemaDoesNotHaveIndex : function(test) {
 		var tempRealSchema = extend([], realSchema);
 		delete tempRealSchema.indexes;
-		schemaQueryAPi.isSchemaStructureCorrect(tempRealSchema, function(err, correct) {
+		schemaQueryAPi.isSatisfingSchemaStructure(tempRealSchema, function(err, correct) {
 			test.deepEqual(err, new Error("Index element should be present even if there are no indexes"),
 					"Should throw error about missing indexes.");
 			test.equal(false, correct, "Should not validate schema.");
@@ -203,7 +203,7 @@ exports.schemaValidation = {
 	},
 
 	shouldValidateSchemaWhenItIsCorrect : function(test) {
-		schemaQueryAPi.isSchemaStructureCorrect(realSchema, function(err, correct) {
+		schemaQueryAPi.isSatisfingSchemaStructure(realSchema, function(err, correct) {
 			test.equal(err, undefined, "Should not throw error on correct schema.");
 			test.equal(true, correct, "Should validate schema.");
 			test.done();
@@ -215,7 +215,7 @@ exports.isSchemaValid = {
 
 	shouldValidatePropertiesAsSchemaComplingWhenTheyAreInTheSchema : function(test) {
 		var properties = [ 'id', 'fname' ];
-		schemaQueryAPi.isSchemaComplied(properties, realSchema, function(err, correct) {
+		schemaQueryAPi.isSatisfingSchema(properties, realSchema, function(err, correct) {
 			test.equal(err, undefined, "Should not throw error when is schema compling.");
 			test.equal(true, correct, "Properties are correct, should match");
 			test.done();
@@ -224,7 +224,7 @@ exports.isSchemaValid = {
 	
 	shouldNotNValidatePropertiesAsSchemaComplingWhenThereIsPropNotInSchema : function(test) {
 		var properties = [ 'id', 'fname1' ];
-		schemaQueryAPi.isSchemaComplied(properties, realSchema, function(err, correct) {
+		schemaQueryAPi.isSatisfingSchema(properties, realSchema, function(err, correct) {
 			test.equal(err, undefined, "Should not throw error when is schema compling.");
 			test.equal(false, correct, "Properties are correct, should match");
 			test.done();
@@ -233,7 +233,7 @@ exports.isSchemaValid = {
 	
 	shouldProduceAnErrorWhenFormatIsNotAsExpected : function(test) {
 		var properties = undefined;
-		schemaQueryAPi.isSchemaComplied(properties, realSchema, function(err, correct) {
+		schemaQueryAPi.isSatisfingSchema(properties, realSchema, function(err, correct) {
 			test.notEqual(err, undefined, "Should throw error when when provide undentified as props");
 			//TODO Should be false
 			test.equal(true, correct, "Properties are correct, should match");
@@ -241,7 +241,7 @@ exports.isSchemaValid = {
 			properties = [];
 			var tempRealSchema = extend([], realSchema);
 			delete tempRealSchema.properties;
-			schemaQueryAPi.isSchemaComplied(properties, tempRealSchema, function(err, correct) {
+			schemaQueryAPi.isSatisfingSchema(properties, tempRealSchema, function(err, correct) {
 				test.notEqual(err, undefined, "Should throw error when schema wrong format");
 				//TODO Should be false
 				test.equal(true, correct, "Properties are not correct, should not match");
