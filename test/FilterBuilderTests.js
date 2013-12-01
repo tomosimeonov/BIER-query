@@ -132,14 +132,14 @@ var complexDatas = [ {
 //Tests
 exports.simpleBuilder = {
 	shouldProduceFilterFromOnlyEq : function(test) {
-		filterBuilder.createFilterFromWhereClause(simpleWhereClauses[0], function(filter) {
+		filterBuilder.createFilterFromWhereClause(simpleWhereClauses[0], function(err,filter) {
 			test.equal(true, filter(datas[0]), "Should pass the first data");
 			test.equal(false, filter(datas[1]), "Should not pass the second data");
 			test.done();
 		});
 	},
 	shouldProduceFilterFromOlnyLess : function(test) {
-		filterBuilder.createFilterFromWhereClause(simpleWhereClauses[1], function(filter) {
+		filterBuilder.createFilterFromWhereClause(simpleWhereClauses[1], function(err,filter) {
 			test.equal(false, filter(datas[0]), "Should not pass the first data");
 			test.equal(true, filter(datas[1]), "Should pass the second data");
 			test.equal(false, filter(datas[2]), "Should not pass the third data");
@@ -147,7 +147,7 @@ exports.simpleBuilder = {
 		});
 	},
 	shouldProduceFilterFromOnlyLessEq : function(test) {
-		filterBuilder.createFilterFromWhereClause(simpleWhereClauses[2], function(filter) {
+		filterBuilder.createFilterFromWhereClause(simpleWhereClauses[2], function(err,filter) {
 			test.equal(true, filter(datas[0]), "Should pass the first data");
 			test.equal(true, filter(datas[1]), "Should pass the second data");
 			test.equal(false, filter(datas[2]), "Should not pass the third data");
@@ -155,7 +155,7 @@ exports.simpleBuilder = {
 		});
 	},
 	shouldProduceFilterFromOlnyGreater : function(test) {
-		filterBuilder.createFilterFromWhereClause(simpleWhereClauses[3], function(filter) {
+		filterBuilder.createFilterFromWhereClause(simpleWhereClauses[3], function(err,filter) {
 			test.equal(false, filter(datas[0]), "Should not pass the first data");
 			test.equal(false, filter(datas[1]), "Should not pass the second data");
 			test.equal(true, filter(datas[2]), "Should pass the third data");
@@ -163,7 +163,7 @@ exports.simpleBuilder = {
 		});
 	},
 	shouldProduceFilterFromOnlyGreaterEq : function(test) {
-		filterBuilder.createFilterFromWhereClause(simpleWhereClauses[4], function(filter) {
+		filterBuilder.createFilterFromWhereClause(simpleWhereClauses[4], function(err,filter) {
 			test.equal(true, filter(datas[0]), "Should pass the first data");
 			test.equal(false, filter(datas[1]), "Should not pass the second data");
 			test.equal(true, filter(datas[2]), "Should pass the third data");
@@ -171,7 +171,7 @@ exports.simpleBuilder = {
 		});
 	},
 	shouldProduceFilterFromOnlyNotEqOne : function(test) {
-		filterBuilder.createFilterFromWhereClause(simpleWhereClauses[5], function(filter) {
+		filterBuilder.createFilterFromWhereClause(simpleWhereClauses[5], function(err,filter) {
 			test.equal(true, filter(datas[0]), "Should pass the first data");
 			test.equal(false, filter(datas[1]), "Should not pass the second data");
 			test.equal(true, filter(datas[2]), "Should pass the third data");
@@ -179,7 +179,7 @@ exports.simpleBuilder = {
 		});
 	},
 	shouldProduceFilterFromOnlyNotEqTwo : function(test) {
-		filterBuilder.createFilterFromWhereClause(simpleWhereClauses[5], function(filter) {
+		filterBuilder.createFilterFromWhereClause(simpleWhereClauses[5], function(err,filter) {
 			test.equal(true, filter(datas[0]), "Should pass the first data");
 			test.equal(false, filter(datas[1]), "Should not pass the second data");
 			test.equal(true, filter(datas[2]), "Should pass the third data");
@@ -191,7 +191,7 @@ exports.simpleBuilder = {
 
 exports.complexBuilder = {
 	shouldProduceFilterFromSimpleAnd : function(test) {
-		filterBuilder.createFilterFromWhereClause(complexWhereClauses[0], function(filter) {
+		filterBuilder.createFilterFromWhereClause(complexWhereClauses[0], function(err,filter) {
 			test.equal(false, filter(complexDatas[0]), "Should not pass the first data");
 			test.equal(true, filter(complexDatas[1]), "Should not pass the second data");
 			test.equal(false, filter(complexDatas[2]), "Should not pass the third data");
@@ -199,7 +199,7 @@ exports.complexBuilder = {
 		});
 	},
 	shouldProduceFilterFromSimpleOr : function(test) {
-		filterBuilder.createFilterFromWhereClause(complexWhereClauses[1], function(filter) {
+		filterBuilder.createFilterFromWhereClause(complexWhereClauses[1], function(err,filter) {
 			test.equal(true, filter(complexDatas[0]), "Should pass the first data");
 			test.equal(true, filter(complexDatas[1]), "Should pass the second data");
 			test.equal(false, filter(complexDatas[2]), "Should not pass the third data");
@@ -207,7 +207,7 @@ exports.complexBuilder = {
 		});
 	},
 	shouldProduceFilterFromComplexOr : function(test) {
-		filterBuilder.createFilterFromWhereClause(complexWhereClauses[2], function(filter) {
+		filterBuilder.createFilterFromWhereClause(complexWhereClauses[2], function(err,filter) {
 			test.equal(true, filter(complexDatas[0]), "Should pass the first data");
 			test.equal(true, filter(complexDatas[1]), "Should pass the second data");
 			test.equal(false, filter(complexDatas[2]), "Should not pass the third data");
@@ -215,7 +215,7 @@ exports.complexBuilder = {
 		});
 	},
 	shouldProduceFilterFromComplexAnd : function(test) {
-		filterBuilder.createFilterFromWhereClause(complexWhereClauses[3], function(filter) {
+		filterBuilder.createFilterFromWhereClause(complexWhereClauses[3], function(err,filter) {
 			test.equal(false, filter(complexDatas[0]), "Should not pass the first data");
 			test.equal(true, filter(complexDatas[1]), "Should pass the second data");
 			test.equal(false, filter(complexDatas[2]), "Should not pass the third data");
