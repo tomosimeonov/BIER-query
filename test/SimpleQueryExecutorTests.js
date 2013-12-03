@@ -5,22 +5,27 @@
 var mockStorageApis = new require('./MockStorageAPIS').MockStorageAPIS();
 var builderBuilder = new require('../lib/QueryConfigurationBuilder');
 
-var data = [ {
-	'id' : 1,
-	'num' : 3
-}, {
-	'id' : 2,
-	'num' : 4
-}, {
-	'id' : 3,
-	'num' : 3
-}, {
-	'id' : 4,
-	'num' : 2
-} ];
+var data = {
+	'01' : {
+		'id' : 1,
+		'num' : 3
+	},
+	'02' : {
+		'id' : 2,
+		'num' : 4
+	},
+	'03' : {
+		'id' : 3,
+		'num' : 3
+	},
+	'04' : {
+		'id' : 4,
+		'num' : 2
+	}
+};
 
-var mockLScan = function(namespace) {
-	return data;
+var mockLScan = function(namespace, callback) {
+	callback(data);
 };
 
 var props = [ '*' ];
@@ -34,7 +39,7 @@ exports.simpleTests = {
 	shouldNotReturnDataOnNoDataPassingFilter : function(test) {
 		var builder = builderBuilder.QueryConfigurationBuilder();
 		builder = builder.setNamespace(namespace).setDestinations([]);
-		
+
 		var filterPlan = {
 			'operator' : '=',
 			'left' : 'id',
@@ -55,7 +60,7 @@ exports.simpleTests = {
 	shouldreturnDataOnDataPassingFilter : function(test) {
 		var builder = builderBuilder.QueryConfigurationBuilder();
 		builder = builder.setNamespace(namespace).setDestinations([]);
-		
+
 		var filterPlan = {
 			'operator' : '=',
 			'left' : 'id',
@@ -76,7 +81,7 @@ exports.simpleTests = {
 	shouldReturnDataOnObjectCountStopper : function(test) {
 		var builder = builderBuilder.QueryConfigurationBuilder();
 		builder = builder.setNamespace(namespace).setDestinations([]);
-		
+
 		var filterPlan = {
 			'operator' : '=',
 			'left' : 'num',
@@ -98,7 +103,7 @@ exports.simpleTests = {
 	shouldReturnDataWithAggregation : function(test) {
 		var builder = builderBuilder.QueryConfigurationBuilder();
 		builder = builder.setNamespace(namespace).setDestinations([]);
-		
+
 		var filterPlan = {
 			'operator' : '>',
 			'left' : 'id',
@@ -118,7 +123,7 @@ exports.simpleTests = {
 	shouldReturnDataWithAggregationAndOtherValues : function(test) {
 		var builder = builderBuilder.QueryConfigurationBuilder();
 		builder = builder.setNamespace(namespace).setDestinations([]);
-		
+
 		var filterPlan = {
 			'operator' : '>',
 			'left' : 'id',
@@ -140,7 +145,7 @@ exports.simpleTests = {
 	shouldAggregationAndPropSameAsTheAggregation : function(test) {
 		var builder = builderBuilder.QueryConfigurationBuilder();
 		builder = builder.setNamespace(namespace).setDestinations([]);
-		
+
 		var filterPlan = {};
 		queryExecutor.formatSelectProperties([ 'num', 'AVR(num)' ], function(err, formatedSelectProperties) {
 			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setTimeout(1);
