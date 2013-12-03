@@ -3,7 +3,7 @@
  */
 
 var mockStorageApis = new require('./MockStorageAPIS').MockStorageAPIS();
-var builder = new require('../lib/QueryStorageBuilder').QueryStorageBuilder();
+var builder = new require('../lib/QueryConfigurationBuilder').QueryConfigurationBuilder();
 
 var data = [ {
 	'id' : 1,
