@@ -129,7 +129,7 @@ exports.simpleTests = {
 						.setOrigin("test").setPayload(localDataV).setCustomPayloadType("SEC_DATA").buildMessage();
 
 				var broadcast = function(a, b, c) {
-					var mess = JSON.parse(a)
+					var mess = JSON.parse(a);
 					if (mess.payload !== undefined && mess.payload.datasearch !== undefined)
 						setTimeout(function() {
 							queryExecutor.message(message);
@@ -142,7 +142,8 @@ exports.simpleTests = {
 		});
 
 	},
-	shouldreturnDataOnDataPassingFilter : function(test) {
+
+	shouldreturnDataOnDataPassingFilterIfAllIsLocal : function(test) {
 		var queryExecutor = new require('../lib/executors/JoinExecutor').JoinExecutor(mockStorageApis, statistics);
 
 		var builder = builderBuilder.JoinQueryConfigurationBuilder();
@@ -161,6 +162,46 @@ exports.simpleTests = {
 				test.equal(1, data.length, 'Should match data.');
 				test.done();
 			}, function(err, id) {
+				var broadcast = function(a, b, c) {
+
+				};
+				mockStorageApis.setBroadcast(broadcast);
+				queryExecutor.executeQuery(id);
+			});
+		});
+	},
+
+	shouldreturnDataOnDataPassingFilterIfPartOfItIsRemote : function(test) {
+		var queryExecutor = new require('../lib/executors/JoinExecutor').JoinExecutor(mockStorageApis, statistics);
+
+		var builder = builderBuilder.JoinQueryConfigurationBuilder();
+		builder = builder.setNamespaceOne(namespaceOne).setNamespaceTwo(namespaceTwo).setJoinPropertyOne('id')
+				.setJoinPropertyTwo('id').setFullType(0);
+
+		var filterPlan = {
+			'operator' : '=',
+			'left' : 'one.id',
+			'right' : 2
+		};
+		mockStorageApis.setLscan(function(namespace, callback) {
+			var passed = false;
+			switch (namespace) {
+			case 'one':
+				passed = true;
+				callback(data_namespaceOne);
+				break;
+			}
+			;
+			if (!passed)
+				callback({});
+		});
+		queryExecutor.formatSelectProperties(props, function(err, formatedSelectProperties) {
+			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setTimeout(4);
+			queryExecutor.registerNewQuery(builder.buildQueryConfig(), function(err, data) {
+				mockStorageApis.setLscan(mockLScan);
+				test.equal(1, data.length, 'Should match data.');
+				test.done();
+			}, function(err, id) {
 
 				var localDataV = Object.keys(data_namespaceTwo).map(function(key) {
 					return data_namespaceTwo[key];
@@ -169,11 +210,11 @@ exports.simpleTests = {
 						.setOrigin("test").setPayload(localDataV).setCustomPayloadType("SEC_DATA").buildMessage();
 
 				var broadcast = function(a, b, c) {
-					var mess = JSON.parse(a)
+					var mess = JSON.parse(a);
 					if (mess.payload !== undefined && mess.payload.datasearch !== undefined)
-					setTimeout(function() {
-						queryExecutor.message(message);
-					}, 500);
+						setTimeout(function() {
+							queryExecutor.message(message);
+						}, 500);
 				};
 				mockStorageApis.setBroadcast(broadcast);
 				queryExecutor.executeQuery(id);
