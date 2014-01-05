@@ -30,19 +30,20 @@ var primaryKeyProperty = {
 
 var realSchema = [];
 realSchema.table = tableName;
-realSchema.primaryKey = 'id';
-realSchema.indexes = [];
 realSchema.properties = [];
 realSchema.properties.id = {
-	type : 'INT',
+	type : 'number',
 	notNull : true
 };
+realSchema.primaryKey = 'id';
+realSchema.indexes = [];
+
 realSchema.properties.fname = {
-	type : 'VARCHAR',
+	type : 'string',
 	notNull : false
 };
 realSchema.properties.lname = {
-	type : 'VARCHAR',
+	type : 'string',
 	notNull : false
 };
 

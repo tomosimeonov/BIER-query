@@ -3,8 +3,8 @@
  */
 
 var mockStorageApis = new require('./MockStorageAPIS').MockStorageAPIS();
-var builderBuilder = new require('../lib/QueryConfigurationBuilder');
-
+var builderBuilder = new require('../lib/builders/SimpleQueryConfigurationBuilder');
+var statistics = new require('../lib/StatisticHolder').StatisticHolder();
 var data = {
 	'01' : {
 		'id' : 1,
@@ -33,11 +33,11 @@ var props = [ '*' ];
 var namespace = 'noneed';
 
 mockStorageApis.setLscan(mockLScan);
-var queryExecutor = new require('../lib/QueryExecutor').QueryExecutor(mockStorageApis);
+var queryExecutor = new require('../lib/executors/SimpleExecutor').SimpleExecutor(mockStorageApis,statistics);
 
 exports.simpleTests = {
 	shouldNotReturnDataOnNoDataPassingFilter : function(test) {
-		var builder = builderBuilder.QueryConfigurationBuilder();
+		var builder = builderBuilder.SimpleQueryConfigurationBuilder();
 		builder = builder.setNamespace(namespace).setDestinations([]);
 
 		var filterPlan = {
@@ -52,13 +52,13 @@ exports.simpleTests = {
 				test.equal(0, data.length, 'Should not match data.');
 				test.done();
 			}, function(err, id) {
-				queryExecutor.updateWithLocalMatch(id);
+				queryExecutor.executeQuery(id);
 			});
 		});
 
 	},
 	shouldreturnDataOnDataPassingFilter : function(test) {
-		var builder = builderBuilder.QueryConfigurationBuilder();
+		var builder = builderBuilder.SimpleQueryConfigurationBuilder();
 		builder = builder.setNamespace(namespace).setDestinations([]);
 
 		var filterPlan = {
@@ -73,13 +73,13 @@ exports.simpleTests = {
 				test.equal(1, data.length, 'Should not match data.');
 				test.done();
 			}, function(err, id) {
-				queryExecutor.updateWithLocalMatch(id);
+				queryExecutor.executeQuery(id);
 			});
 		});
 	},
 
 	shouldReturnDataOnObjectCountStopper : function(test) {
-		var builder = builderBuilder.QueryConfigurationBuilder();
+		var builder = builderBuilder.SimpleQueryConfigurationBuilder();
 		builder = builder.setNamespace(namespace).setDestinations([]);
 
 		var filterPlan = {
@@ -96,12 +96,12 @@ exports.simpleTests = {
 				test.notEqual(2, data[1]['id'], 'Should not have id 2');
 				test.done();
 			}, function(err, id) {
-				queryExecutor.updateWithLocalMatch(id);
+				queryExecutor.executeQuery(id);
 			});
 		});
 	},
 	shouldReturnDataWithAggregation : function(test) {
-		var builder = builderBuilder.QueryConfigurationBuilder();
+		var builder = builderBuilder.SimpleQueryConfigurationBuilder();
 		builder = builder.setNamespace(namespace).setDestinations([]);
 
 		var filterPlan = {
@@ -116,12 +116,12 @@ exports.simpleTests = {
 				test.equal(9, data[0]['SUM(num)'], 'Should sum to 9');
 				test.done();
 			}, function(err, id) {
-				queryExecutor.updateWithLocalMatch(id);
+				queryExecutor.executeQuery(id);
 			});
 		});
 	},
 	shouldReturnDataWithAggregationAndOtherValues : function(test) {
-		var builder = builderBuilder.QueryConfigurationBuilder();
+		var builder = builderBuilder.SimpleQueryConfigurationBuilder();
 		builder = builder.setNamespace(namespace).setDestinations([]);
 
 		var filterPlan = {
@@ -138,12 +138,12 @@ exports.simpleTests = {
 				test.equal(2, data[0]['id'], 'Should sum to 9');
 				test.done();
 			}, function(err, id) {
-				queryExecutor.updateWithLocalMatch(id);
+				queryExecutor.executeQuery(id);
 			});
 		});
 	},
 	shouldAggregationAndPropSameAsTheAggregation : function(test) {
-		var builder = builderBuilder.QueryConfigurationBuilder();
+		var builder = builderBuilder.SimpleQueryConfigurationBuilder();
 		builder = builder.setNamespace(namespace).setDestinations([]);
 
 		var filterPlan = {};
@@ -155,7 +155,7 @@ exports.simpleTests = {
 				test.equal(4, data[1]['num'], 'Should equal to 4');
 				test.done();
 			}, function(err, id) {
-				queryExecutor.updateWithLocalMatch(id);
+				queryExecutor.executeQuery(id);
 			});
 		});
 	}
