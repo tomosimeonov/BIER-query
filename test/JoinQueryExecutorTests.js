@@ -114,30 +114,28 @@ exports.simpleTests = {
 			'left' : 'one.id',
 			'right' : 5
 		};
+		
+		var localDataV = Object.keys(data_namespaceTwo).map(function(key) {
+			return data_namespaceTwo[key];
+		});
+
+		var message = messageBuilderBuilder.QueryMessageBuilder().setQueryId("test-join-0").setJoinType()
+				.setOrigin("test").setPayload(localDataV).setCustomPayloadType("SEC_DATA").buildMessage();
+
+		var broadcast = function(a, b, c) {
+			var mess = JSON.parse(a);
+			if (mess.payload !== undefined && mess.payload.datasearch !== undefined)
+				setTimeout(function() {
+					queryExecutor.message(message);
+				}, 500);
+		};
+		mockStorageApis.setBroadcast(broadcast);
 
 		queryExecutor.formatSelectProperties(props, function(err, formatedSelectProperties) {
 			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setTimeout(4);
-			queryExecutor.registerNewQuery(builder.buildQueryConfig(), function(err, data) {
+			queryExecutor.executeQuery(builder.buildQueryConfig(), function(err, data) {
 				test.equal(0, data.length, 'Should not match data.');
 				test.done();
-			}, function(err, id) {
-				var localDataV = Object.keys(data_namespaceTwo).map(function(key) {
-					return data_namespaceTwo[key];
-				});
-
-				var message = messageBuilderBuilder.QueryMessageBuilder().setQueryId(id).setJoinType()
-						.setOrigin("test").setPayload(localDataV).setCustomPayloadType("SEC_DATA").buildMessage();
-
-				var broadcast = function(a, b, c) {
-					var mess = JSON.parse(a);
-					if (mess.payload !== undefined && mess.payload.datasearch !== undefined)
-						setTimeout(function() {
-							queryExecutor.message(message);
-						}, 500);
-				};
-				mockStorageApis.setBroadcast(broadcast);
-
-				queryExecutor.executeQuery(id);
 			});
 		});
 
@@ -155,18 +153,17 @@ exports.simpleTests = {
 			'left' : 'one.id',
 			'right' : 2
 		};
+		
+		var broadcast = function(a, b, c) {
+
+		};
+		mockStorageApis.setBroadcast(broadcast);
 
 		queryExecutor.formatSelectProperties(props, function(err, formatedSelectProperties) {
 			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setTimeout(4);
-			queryExecutor.registerNewQuery(builder.buildQueryConfig(), function(err, data) {
+			queryExecutor.executeQuery(builder.buildQueryConfig(), function(err, data) {
 				test.equal(1, data.length, 'Should match data.');
 				test.done();
-			}, function(err, id) {
-				var broadcast = function(a, b, c) {
-
-				};
-				mockStorageApis.setBroadcast(broadcast);
-				queryExecutor.executeQuery(id);
 			});
 		});
 	},
@@ -195,125 +192,80 @@ exports.simpleTests = {
 			if (!passed)
 				callback({});
 		});
+		
+		var localDataV = Object.keys(data_namespaceTwo).map(function(key) {
+			return data_namespaceTwo[key];
+		});
+		var message = messageBuilderBuilder.QueryMessageBuilder().setQueryId("test-join-0").setJoinType()
+				.setOrigin("test").setPayload(localDataV).setCustomPayloadType("SEC_DATA").buildMessage();
+
+		var broadcast = function(a, b, c) {
+			var mess = JSON.parse(a);
+			if (mess.payload !== undefined && mess.payload.datasearch !== undefined)
+				setTimeout(function() {
+					queryExecutor.message(message);
+				}, 500);
+		};
+		mockStorageApis.setBroadcast(broadcast);
+		
 		queryExecutor.formatSelectProperties(props, function(err, formatedSelectProperties) {
 			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setTimeout(4);
-			queryExecutor.registerNewQuery(builder.buildQueryConfig(), function(err, data) {
+			queryExecutor.executeQuery(builder.buildQueryConfig(), function(err, data) {
 				mockStorageApis.setLscan(mockLScan);
 				test.equal(1, data.length, 'Should match data.');
 				test.done();
-			}, function(err, id) {
+			});
+		});
+	},
 
-				var localDataV = Object.keys(data_namespaceTwo).map(function(key) {
-					return data_namespaceTwo[key];
-				});
-				var message = messageBuilderBuilder.QueryMessageBuilder().setQueryId(id).setJoinType()
-						.setOrigin("test").setPayload(localDataV).setCustomPayloadType("SEC_DATA").buildMessage();
+	shouldReturnDataOnObjectCountStopper : function(test) {
+		var queryExecutor = new require('../lib/executors/JoinExecutor').JoinExecutor(mockStorageApis, statistics);
 
-				var broadcast = function(a, b, c) {
-					var mess = JSON.parse(a);
-					if (mess.payload !== undefined && mess.payload.datasearch !== undefined)
-						setTimeout(function() {
-							queryExecutor.message(message);
-						}, 500);
-				};
-				mockStorageApis.setBroadcast(broadcast);
-				queryExecutor.executeQuery(id);
+		var builder = builderBuilder.JoinQueryConfigurationBuilder();
+		builder = builder.setNamespaceOne(namespaceOne).setNamespaceTwo(namespaceTwo).setJoinPropertyOne('id')
+				.setJoinPropertyTwo('id').setFullType(0);
+
+		var filterPlan = {
+			'operator' : '=',
+			'left' : 'one.id',
+			'right' : 2
+		};
+		mockStorageApis.setLscan(function(namespace, callback) {
+			var passed = false;
+			switch (namespace) {
+			case 'one':
+				passed = true;
+				callback(data_namespaceOne);
+				break;
+			}
+			;
+			if (!passed)
+				callback({});
+		});
+		
+		var localDataV = Object.keys(data_namespaceTwo).map(function(key) {
+			return data_namespaceTwo[key];
+		});
+		var message = messageBuilderBuilder.QueryMessageBuilder().setQueryId("test-join-0").setJoinType()
+				.setOrigin("test").setPayload(localDataV).setCustomPayloadType("SEC_DATA").buildMessage();
+
+		var broadcast = function(a, b, c) {
+			var mess = JSON.parse(a);
+			if (mess.payload !== undefined && mess.payload.datasearch !== undefined)
+				setTimeout(function() {
+					queryExecutor.message(message);
+				}, 500);
+		};
+		mockStorageApis.setBroadcast(broadcast);
+		
+		queryExecutor.formatSelectProperties(props, function(err, formatedSelectProperties) {
+			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setMaxObjects(
+					2);
+			queryExecutor.executeQuery(builder.buildQueryConfig(), function(err, data) {
+				mockStorageApis.setLscan(mockLScan);
+				test.equal(1, data.length, 'Should match data.');
+				test.done();
 			});
 		});
 	}
-// ,
-//
-// shouldReturnDataOnObjectCountStopper : function(test) {
-// var builder = builderBuilder.SimpleQueryConfigurationBuilder();
-// builder = builder.setNamespace(namespace).setDestinations([]);
-//
-// var filterPlan = {
-// 'operator' : '=',
-// 'left' : 'num',
-// 'right' : 3
-// };
-// queryExecutor.formatSelectProperties(props, function(err,
-// formatedSelectProperties) {
-// builder =
-// builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setMaxObjects(
-// 2);
-// queryExecutor.registerNewQuery(builder.buildQueryConfig(), function(err,
-// data) {
-// test.equal(2, data.length, 'Should return two.');
-// test.notEqual(2, data[0]['id'], 'Should not have id 2');
-// test.notEqual(2, data[1]['id'], 'Should not have id 2');
-// test.done();
-// }, function(err, id) {
-// queryExecutor.executeQuery(id);
-// });
-// });
-// },
-// shouldReturnDataWithAggregation : function(test) {
-// var builder = builderBuilder.SimpleQueryConfigurationBuilder();
-// builder = builder.setNamespace(namespace).setDestinations([]);
-//
-// var filterPlan = {
-// 'operator' : '>',
-// 'left' : 'id',
-// 'right' : 1
-// };
-// queryExecutor.formatSelectProperties([ 'SUM(num)' ], function(err,
-// formatedSelectProperties) {
-// builder =
-// builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setTimeout(1);
-// queryExecutor.registerNewQuery(builder.buildQueryConfig(), function(err,
-// data) {
-// test.equal(1, Object.keys(data).length, 'Should return one object.');
-// test.equal(9, data[0]['SUM(num)'], 'Should sum to 9');
-// test.done();
-// }, function(err, id) {
-// queryExecutor.executeQuery(id);
-// });
-// });
-// },
-// shouldReturnDataWithAggregationAndOtherValues : function(test) {
-// var builder = builderBuilder.SimpleQueryConfigurationBuilder();
-// builder = builder.setNamespace(namespace).setDestinations([]);
-//
-// var filterPlan = {
-// 'operator' : '>',
-// 'left' : 'id',
-// 'right' : 1
-// };
-//
-// queryExecutor.formatSelectProperties([ 'id', 'SUM(num)' ], function(err,
-// formatedSelectProperties) {
-// builder =
-// builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setTimeout(1);
-// queryExecutor.registerNewQuery(builder.buildQueryConfig(), function(err,
-// data) {
-// test.equal(3, Object.keys(data).length, 'Should return 3 objects.');
-// test.equal(9, data[0]['SUM(num)'], 'Should sum to 9');
-// test.equal(2, data[0]['id'], 'Should sum to 9');
-// test.done();
-// }, function(err, id) {
-// queryExecutor.executeQuery(id);
-// });
-// });
-// },
-// shouldAggregationAndPropSameAsTheAggregation : function(test) {
-// var builder = builderBuilder.SimpleQueryConfigurationBuilder();
-// builder = builder.setNamespace(namespace).setDestinations([]);
-//
-// var filterPlan = {};
-// queryExecutor.formatSelectProperties([ 'num', 'AVR(num)' ], function(err,
-// formatedSelectProperties) {
-// builder =
-// builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setTimeout(1);
-// queryExecutor.registerNewQuery(builder.buildQueryConfig(), function(err,
-// data) {
-// test.equal(4, Object.keys(data).length, 'Should return 4 objects.');
-// test.equal(3, data[0]['AVR(num)'], 'Should avr to 3');
-// test.equal(4, data[1]['num'], 'Should equal to 4');
-// test.done();
-// }, function(err, id) {
-// queryExecutor.executeQuery(id);
-// });
-// });
-// }
 };
