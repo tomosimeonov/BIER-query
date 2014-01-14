@@ -6,6 +6,9 @@ var mockStorageApis = new require('./MockStorageAPIS').MockStorageAPIS();
 var builderBuilder = new require('../lib/builders/JoinQueryConfigurationBuilder');
 var messageBuilderBuilder = require('../lib/builders/QueryMessageBuilder');
 var statistics = new require('../lib/StatisticHolder').StatisticHolder();
+
+var emiterBuilder = require('events');
+
 var data_namespaceOne = {
 	'01' : {
 		'id' : 1,
@@ -101,6 +104,17 @@ var namespaceOne = 'one';
 var namespaceTwo = 'two';
 mockStorageApis.setLscan(mockLScan);
 
+var buildEmitter = function(checker) {
+	var dataHolder = [];
+	var emiter = new emiterBuilder.EventEmitter();
+	emiter = emiter.on('data', function(data) {
+		dataHolder = dataHolder.concat(data);
+	}).on('end', function() {
+		checker(dataHolder);
+	});
+	return emiter;
+};
+
 exports.simpleTests = {
 	shouldNotReturnDataOnNoDataPassingFilter : function(test) {
 		var queryExecutor = new require('../lib/executors/JoinExecutor').JoinExecutor(mockStorageApis, statistics);
@@ -131,12 +145,14 @@ exports.simpleTests = {
 		};
 		mockStorageApis.setBroadcast(broadcast);
 
+		var emiter = buildEmitter(function(data) {
+			test.equal(0, data.length, 'Should not match data.');
+			test.done();
+		});
+		
 		queryExecutor.formatSelectProperties(props, function(err, formatedSelectProperties) {
 			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setTimeout(4);
-			queryExecutor.executeQuery(builder.buildQueryConfig(), function(err, data) {
-				test.equal(0, data.length, 'Should not match data.');
-				test.done();
-			});
+			queryExecutor.executeQuery(builder.buildQueryConfig(), emiter);
 		});
 
 	},
@@ -159,12 +175,14 @@ exports.simpleTests = {
 		};
 		mockStorageApis.setBroadcast(broadcast);
 
+		var emiter = buildEmitter(function(data) {
+			test.equal(1, data.length, 'Should match data.');
+			test.done();
+		});
+		
 		queryExecutor.formatSelectProperties(props, function(err, formatedSelectProperties) {
 			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setTimeout(4);
-			queryExecutor.executeQuery(builder.buildQueryConfig(), function(err, data) {
-				test.equal(1, data.length, 'Should match data.');
-				test.done();
-			});
+			queryExecutor.executeQuery(builder.buildQueryConfig(), emiter);
 		});
 	},
 
@@ -208,13 +226,14 @@ exports.simpleTests = {
 		};
 		mockStorageApis.setBroadcast(broadcast);
 		
+		var emiter = buildEmitter(function(data) {
+			test.equal(1, data.length, 'Should match data.');
+			test.done();
+		});
+		
 		queryExecutor.formatSelectProperties(props, function(err, formatedSelectProperties) {
 			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setTimeout(4);
-			queryExecutor.executeQuery(builder.buildQueryConfig(), function(err, data) {
-				mockStorageApis.setLscan(mockLScan);
-				test.equal(1, data.length, 'Should match data.');
-				test.done();
-			});
+			queryExecutor.executeQuery(builder.buildQueryConfig(), emiter);
 		});
 	},
 
@@ -258,14 +277,15 @@ exports.simpleTests = {
 		};
 		mockStorageApis.setBroadcast(broadcast);
 		
+		var emiter = buildEmitter(function(data) {
+			test.equal(1, data.length, 'Should match data.');
+			test.done();
+		});
+		
 		queryExecutor.formatSelectProperties(props, function(err, formatedSelectProperties) {
 			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setMaxObjects(
 					2);
-			queryExecutor.executeQuery(builder.buildQueryConfig(), function(err, data) {
-				mockStorageApis.setLscan(mockLScan);
-				test.equal(1, data.length, 'Should match data.');
-				test.done();
-			});
+			queryExecutor.executeQuery(builder.buildQueryConfig(), emiter);
 		});
 	}
 };
