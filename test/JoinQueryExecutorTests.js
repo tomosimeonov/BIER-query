@@ -107,9 +107,9 @@ mockStorageApis.setLscan(mockLScan);
 var buildEmitter = function(checker) {
 	var dataHolder = [];
 	var emiter = new emiterBuilder.EventEmitter();
-	emiter = emiter.on('data', function(data) {
+	emiter = emiter.on('DATA', function(data) {
 		dataHolder = dataHolder.concat(data);
-	}).on('end', function() {
+	}).on('FINISHED', function() {
 		checker(dataHolder);
 	});
 	return emiter;
