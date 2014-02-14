@@ -32,7 +32,7 @@ var realSchema = [];
 realSchema.table = tableName;
 realSchema.properties = [];
 realSchema.properties.id = {
-	type : 'number',
+	type : 'int',
 	notNull : true
 };
 realSchema.primaryKey = 'id';
@@ -58,6 +58,7 @@ initialSchema.definitions[3] = primaryKeyProperty;
 exports.schemaTransformation = {
 	shouldTransformIntialPlanToRealOne : function(test) {
 		schemaQueryAPi.permenentSchemaCreateror(initialSchema, function(err, schema) {
+			console.log(err)
 			test.equal(err, undefined, "Should not produce error");
 			test.deepEqual(realSchema, schema, "Schema did not match");
 			test.done();
@@ -250,4 +251,75 @@ exports.isSchemaValid = {
 			});
 		});
 	}
+};
+
+
+var schemaWithoutNumbers = [];
+schemaWithoutNumbers.table = tableName;
+schemaWithoutNumbers.properties = [];
+schemaWithoutNumbers.properties.id = {
+	type : 'string',
+	notNull : true
+};
+schemaWithoutNumbers.primaryKey = 'id';
+schemaWithoutNumbers.indexes = [];
+
+schemaWithoutNumbers.properties.fname = {
+	type : 'string',
+	notNull : false
+};
+schemaWithoutNumbers.properties.lname = {
+	type : 'string',
+	notNull : false
+};
+
+var schemaWithNumbers = extend([], schemaWithoutNumbers);
+schemaWithNumbers.properties.age = {
+		type : 'int',
+		notNull : false
+	};
+
+schemaWithNumbers.properties.salary = {
+		type : 'float',
+		notNull : false
+	};
+exports.transformStoredEntryToSchemaValid = {
+		
+		shouldTransformEntryWithoutNumbers : function(test){
+			var storedEntry = {};
+			storedEntry.id = "a";
+			storedEntry.fname = "Tom";
+			storedEntry.lname = "Sim";
+			
+			var properEntry = {};
+			properEntry.id = "a";
+			properEntry.fname = "Tom";
+			properEntry.lname = "Sim";
+			
+			schemaQueryAPi.transformStoredEntryToSchemaValid(schemaWithoutNumbers,[storedEntry],function(entry){
+				test.deepEqual([properEntry], entry, "There should be no change in the entry");
+				test.done();
+			});
+		},
+		shouldTransformEntryWithNumbers : function(test){
+			var storedEntry = {};
+			storedEntry.id = "a";
+			storedEntry.fname = "Tom";
+			storedEntry.lname = "Sim";
+			storedEntry.age = "18";
+			storedEntry.salary = "2.2";
+			
+			var properEntry = {};
+			properEntry.id = "a";
+			properEntry.fname = "Tom";
+			properEntry.lname = "Sim";
+			properEntry.age = 18;
+			properEntry.salary = 2.2;
+			
+			schemaQueryAPi.transformStoredEntryToSchemaValid(schemaWithoutNumbers,[storedEntry],function(entry){
+				test.deepEqual([properEntry], entry, "There should be change in the entry");
+				test.done();
+			});
+		}
+		
 };
