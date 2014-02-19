@@ -6,8 +6,10 @@ var mockStorageApis = new require('./MockStorageAPIS').MockStorageAPIS();
 var builderBuilder = new require('../lib/builders/JoinQueryConfigurationBuilder');
 var messageBuilderBuilder = require('../lib/builders/QueryMessageBuilder');
 var statistics = new require('../lib/StatisticHolder').StatisticHolder();
-
 var emiterBuilder = require('events');
+
+var SEC_DATA = "SEC_DATA";
+var PAYLOAD_TYPE_DATA_SEARCH = "DATASEARCH";
 
 var data_namespaceOne = {
 	'01' : {
@@ -105,6 +107,7 @@ var namespaceTwo = 'two';
 mockStorageApis.setLscan(mockLScan);
 
 var buildEmitter = function(checker) {
+
 	var dataHolder = [];
 	var emiter = new emiterBuilder.EventEmitter();
 	emiter = emiter.on('DATA', function(data) {
@@ -219,7 +222,7 @@ exports.simpleTests = {
 
 		var broadcast = function(a, b, c) {
 			var mess = JSON.parse(a);
-			if (mess.payload !== undefined && mess.payload.datasearch !== undefined)
+			if (mess.payload !== undefined && mess.payloadType === PAYLOAD_TYPE_DATA_SEARCH)
 				setTimeout(function() {
 					queryExecutor.message(message);
 				}, 500);
@@ -270,7 +273,7 @@ exports.simpleTests = {
 
 		var broadcast = function(a, b, c) {
 			var mess = JSON.parse(a);
-			if (mess.payload !== undefined && mess.payload.datasearch !== undefined)
+			if (mess.payload !== undefined && mess.payloadType === PAYLOAD_TYPE_DATA_SEARCH)
 				setTimeout(function() {
 					queryExecutor.message(message);
 				}, 500);
