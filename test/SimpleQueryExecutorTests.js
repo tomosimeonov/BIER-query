@@ -8,6 +8,22 @@ var statistics = new require('../lib/StatisticHolder').StatisticHolder();
 
 var emiterBuilder = require('events');
 
+var schema = {
+	'table' : 'test',
+	'indexes' : [],
+	'primaryKey' : 'id',
+	'properties' : {
+		'id' : {
+			'notNull' : true,
+			'type' : 'int'
+		},
+		'num' : {
+			'notNull' : true,
+			'type' : 'int'
+		}
+	}
+};
+
 var data = {
 	'01' : {
 		'id' : 1,
@@ -27,15 +43,23 @@ var data = {
 	}
 };
 
+var mockGetGlobal = function(namespace, callback){
+	if(namespace == 'test'){
+		callback(schema);
+	}else{
+		callback(undefined);
+	}
+}
 var mockLScan = function(namespace, callback) {
 	callback(data);
 };
 
 var props = [ '*' ];
 
-var namespace = 'noneed';
+var namespace = 'test';
 
 mockStorageApis.setLscan(mockLScan);
+mockStorageApis.setGetGlobal(mockGetGlobal);
 var queryExecutor = new require('../lib/executors/SimpleExecutor').SimpleExecutor(mockStorageApis, statistics);
 
 var buildEmitter = function(checker) {
