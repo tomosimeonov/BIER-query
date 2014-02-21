@@ -20,6 +20,7 @@
 	"curry": "1.2.0",
     "simple-sql-parser": "http://github.com/EverettQuebral/simple-sql-parser/tarball/master",
     "sqljs": "http://github.com/langpavel/node-sqljs/tarball/master",
-    "nodeunit": "0.8.2"
+    "nodeunit": "0.8.2",
+    "underscore": "1.6.0"
   }
 }
