@@ -1,7 +1,7 @@
 /**
  * New node file
  */
-
+// TODO FIX TO USE HASH MAPS
 var mockStorageApis = new require('./MockStorageAPIS').MockStorageAPIS();
 var builderBuilder = new require('../lib/builders/SimpleQueryConfigurationBuilder');
 var statistics = new require('../lib/StatisticHolder').StatisticHolder();
@@ -43,10 +43,10 @@ var data = {
 	}
 };
 
-var mockGetGlobal = function(namespace, callback){
-	if(namespace == 'test'){
+var mockGetGlobal = function(namespace, callback) {
+	if (namespace == 'test') {
 		callback(schema);
-	}else{
+	} else {
 		callback(undefined);
 	}
 }
@@ -196,5 +196,38 @@ exports.simpleTests = {
 			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setTimeout(1);
 			queryExecutor.executeQuery(builder.buildQueryConfig(), emiter);
 		});
+	},
+	shouldreturnDataOnDataPassingFilterIfPartOfItIsRemote : function(test) {
+		var builder = builderBuilder.SimpleQueryConfigurationBuilder();
+		builder = builder.setNamespace(namespace).setDestinations([]);
+
+		var emiter = buildEmitter(function(data) {
+			test.equal(4, data.length, 'Should not match data.');
+			test.done();
+		});
+
+		var filterPlan = {
+			'operator' : '>',
+			'left' : 'num',
+			'right' : 0
+		};
+
+		var message = require('../lib/builders/QueryMessageBuilder').QueryMessageBuilder().setQueryId("test-simple-0").setSimpleType()
+				.setOrigin("test").setPayload(data).setPayloadTypeData().buildMessage();
+
+		var broadcast = function(a, b, c) {
+			var mess = JSON.parse(a);
+			if (mess.payload !== undefined && mess.payloadType === "DATA")
+				setTimeout(function() {
+					queryExecutor.message(message);
+				}, 500);
+		};
+		mockStorageApis.setBroadcast(broadcast);
+		var queryExecutor = new require('../lib/executors/SimpleExecutor').SimpleExecutor(mockStorageApis, statistics);
+		queryExecutor.formatSelectProperties(props, function(err, formatedSelectProperties) {
+			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setTimeout(2);
+			queryExecutor.executeQuery(builder.buildQueryConfig(), emiter);
+		});
 	}
+
 };

@@ -1,7 +1,7 @@
 /**
  * New node file
  */
-
+//TODO FIX TO USE HASH MAPS
 var mockStorageApis = new require('./MockStorageAPIS').MockStorageAPIS();
 var builderBuilder = new require('../lib/builders/JoinQueryConfigurationBuilder');
 var messageBuilderBuilder = require('../lib/builders/QueryMessageBuilder');
