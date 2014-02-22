@@ -11,6 +11,46 @@ var emiterBuilder = require('events');
 var SEC_DATA = "SEC_DATA";
 var PAYLOAD_TYPE_DATA_SEARCH = "DATASEARCH";
 
+var schemaOne = {
+	'table' : 'one',
+	'indexes' : [],
+	'primaryKey' : 'id',
+	'properties' : {
+		'id' : {
+			'notNull' : true,
+			'type' : 'int'
+		},
+		'num' : {
+			'notNull' : true,
+			'type' : 'int'
+		},
+		'one' : {
+			'notNull' : true,
+			'type' : 'int'
+		}
+	}
+};
+
+var schemaTwo = {
+	'table' : 'two',
+	'indexes' : [],
+	'primaryKey' : 'id',
+	'properties' : {
+		'id' : {
+			'notNull' : true,
+			'type' : 'int'
+		},
+		'num' : {
+			'notNull' : true,
+			'type' : 'int'
+		},
+		'two' : {
+			'notNull' : true,
+			'type' : 'int'
+		}
+	}
+};
+
 var data_namespaceOne = {
 	'01' : {
 		'id' : 1,
@@ -104,7 +144,19 @@ var props = [ '*' ];
 
 var namespaceOne = 'one';
 var namespaceTwo = 'two';
+
+var mockGetGlobal = function(namespace, callback) {
+	if (namespace == 'one') {
+		callback(schemaOne);
+	} else if (namespace == 'two') {
+		callback(schemaTwo);
+	} else {
+		callback(undefined);
+	}
+};
+
 mockStorageApis.setLscan(mockLScan);
+mockStorageApis.setGetGlobal(mockGetGlobal);
 
 var buildEmitter = function(checker) {
 
@@ -131,13 +183,13 @@ exports.simpleTests = {
 			'left' : 'one.id',
 			'right' : 5
 		};
-		
+
 		var localDataV = Object.keys(data_namespaceTwo).map(function(key) {
 			return data_namespaceTwo[key];
 		});
 
-		var message = messageBuilderBuilder.QueryMessageBuilder().setQueryId("test-join-0").setJoinType()
-				.setOrigin("test").setPayload(localDataV).setCustomPayloadType("SEC_DATA").buildMessage();
+		var message = messageBuilderBuilder.QueryMessageBuilder().setQueryId("test-join-0").setJoinType().setOrigin(
+				"test").setPayload(localDataV).setCustomPayloadType("SEC_DATA").buildMessage();
 
 		var broadcast = function(a, b, c) {
 			var mess = JSON.parse(a);
@@ -152,7 +204,7 @@ exports.simpleTests = {
 			test.equal(0, data.length, 'Should not match data.');
 			test.done();
 		});
-		
+
 		queryExecutor.formatSelectProperties(props, function(err, formatedSelectProperties) {
 			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setTimeout(4);
 			queryExecutor.executeQuery(builder.buildQueryConfig(), emiter);
@@ -172,7 +224,7 @@ exports.simpleTests = {
 			'left' : 'one.id',
 			'right' : 2
 		};
-		
+
 		var broadcast = function(a, b, c) {
 
 		};
@@ -182,7 +234,7 @@ exports.simpleTests = {
 			test.equal(1, data.length, 'Should match data.');
 			test.done();
 		});
-		
+
 		queryExecutor.formatSelectProperties(props, function(err, formatedSelectProperties) {
 			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setTimeout(4);
 			queryExecutor.executeQuery(builder.buildQueryConfig(), emiter);
@@ -213,12 +265,12 @@ exports.simpleTests = {
 			if (!passed)
 				callback({});
 		});
-		
+
 		var localDataV = Object.keys(data_namespaceTwo).map(function(key) {
 			return data_namespaceTwo[key];
 		});
-		var message = messageBuilderBuilder.QueryMessageBuilder().setQueryId("test-join-0").setJoinType()
-				.setOrigin("test").setPayload(localDataV).setCustomPayloadType("SEC_DATA").buildMessage();
+		var message = messageBuilderBuilder.QueryMessageBuilder().setQueryId("test-join-0").setJoinType().setOrigin(
+				"test").setPayload(localDataV).setCustomPayloadType("SEC_DATA").buildMessage();
 
 		var broadcast = function(a, b, c) {
 			var mess = JSON.parse(a);
@@ -228,12 +280,12 @@ exports.simpleTests = {
 				}, 500);
 		};
 		mockStorageApis.setBroadcast(broadcast);
-		
+
 		var emiter = buildEmitter(function(data) {
 			test.equal(1, data.length, 'Should match data.');
 			test.done();
 		});
-		
+
 		queryExecutor.formatSelectProperties(props, function(err, formatedSelectProperties) {
 			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setTimeout(4);
 			queryExecutor.executeQuery(builder.buildQueryConfig(), emiter);
@@ -264,12 +316,12 @@ exports.simpleTests = {
 			if (!passed)
 				callback({});
 		});
-		
+
 		var localDataV = Object.keys(data_namespaceTwo).map(function(key) {
 			return data_namespaceTwo[key];
 		});
-		var message = messageBuilderBuilder.QueryMessageBuilder().setQueryId("test-join-0").setJoinType()
-				.setOrigin("test").setPayload(localDataV).setCustomPayloadType("SEC_DATA").buildMessage();
+		var message = messageBuilderBuilder.QueryMessageBuilder().setQueryId("test-join-0").setJoinType().setOrigin(
+				"test").setPayload(localDataV).setCustomPayloadType("SEC_DATA").buildMessage();
 
 		var broadcast = function(a, b, c) {
 			var mess = JSON.parse(a);
@@ -279,12 +331,12 @@ exports.simpleTests = {
 				}, 500);
 		};
 		mockStorageApis.setBroadcast(broadcast);
-		
+
 		var emiter = buildEmitter(function(data) {
 			test.equal(1, data.length, 'Should match data.');
 			test.done();
 		});
-		
+
 		queryExecutor.formatSelectProperties(props, function(err, formatedSelectProperties) {
 			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setMaxObjects(
 					2);

@@ -3,7 +3,7 @@
 nodeunit ExecutorUtilitiesTest.js   
 nodeunit FilterBuilderTests.js
 nodeunit SchemeManipulationFuncsTests.js
-nodeunit JoinQueryExecutorTests.js
+nodeunit SQLParserTests.js  
 nodeunit SimpleQueryExecutorTests.js
-nodeunit SQLParserTests.js                           
+nodeunit JoinQueryExecutorTests.js                      
 
