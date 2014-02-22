@@ -196,7 +196,27 @@ exports.simpleTests = {
 			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setTimeout(1);
 			queryExecutor.executeQuery(builder.buildQueryConfig(), emiter);
 		});
-	},
+	}
+	,
+//	shouldAggregationAndPropSameAsTheAggregationIfPartOfItIsRemote : function(test) {
+//		var builder = builderBuilder.SimpleQueryConfigurationBuilder();
+//		builder = builder.setNamespace(namespace).setDestinations([]);
+//
+//		var emiter = buildEmitter(function(data) {
+//			test.equal(4, Object.keys(data).length, 'Should return 4 objects.');
+//			test.equal(3, data[0]['AVR(num)'], 'Should avr to 3');
+//			test.equal(4, data[1]['num'], 'Should equal to 4');
+//			test.done();
+//		});
+//
+//		var filterPlan = {};
+//		
+//		
+//		queryExecutor.formatSelectProperties([ 'num', 'AVR(num)' ], function(err, formatedSelectProperties) {
+//			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setTimeout(1);
+//			queryExecutor.executeQuery(builder.buildQueryConfig(), emiter);
+//		});
+//	},
 	shouldreturnDataOnDataPassingFilterIfPartOfItIsRemote : function(test) {
 		var builder = builderBuilder.SimpleQueryConfigurationBuilder();
 		builder = builder.setNamespace(namespace).setDestinations([]);
