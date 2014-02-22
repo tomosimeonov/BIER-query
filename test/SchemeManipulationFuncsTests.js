@@ -58,7 +58,6 @@ initialScheme.definitions[3] = primaryKeyProperty;
 exports.schemeTransformation = {
 	shouldTransformIntialPlanToRealOne : function(test) {
 		schemeQueryAPi.permenentSchemeCreateror(initialScheme, function(err, scheme) {
-			console.log(err)
 			test.equal(err, undefined, "Should not produce error");
 			test.deepEqual(realScheme, scheme, "Scheme did not match");
 			test.done();
