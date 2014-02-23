@@ -215,8 +215,11 @@ exports.schemaValidation = {
 exports.isSchemaValid = {
 
 	shouldValidatePropertiesAsSchemaComplingWhenTheyAreInTheSchema : function(test) {
-		var properties = [ 'id', 'fname' ];
-		schemaQueryAPi.isSatisfingSchema(properties, realSchema, function(err, correct) {
+		var properties = [];
+		properties[tableName] = [ 'id', 'fname' ];
+		var schemas = {};
+		schemas[tableName] = realSchema;
+		schemaQueryAPi.isSatisfingSchema(properties, schemas, function(err, correct) {
 			test.equal(err, undefined, "Should not throw error when is schema compling.");
 			test.equal(true, correct, "Properties are correct, should match");
 			test.done();
@@ -224,8 +227,11 @@ exports.isSchemaValid = {
 	},
 	
 	shouldNotNValidatePropertiesAsSchemaComplingWhenThereIsPropNotInSchema : function(test) {
-		var properties = [ 'id', 'fname1' ];
-		schemaQueryAPi.isSatisfingSchema(properties, realSchema, function(err, correct) {
+		var properties = [];
+		properties[tableName] = [ 'id', 'fname1' ];
+		var schemas = {};
+		schemas[tableName] = realSchema;
+		schemaQueryAPi.isSatisfingSchema(properties, schemas, function(err, correct) {
 			test.equal(err, undefined, "Should not throw error when is schema compling.");
 			test.equal(false, correct, "Properties are correct, should match");
 			test.done();
@@ -234,18 +240,22 @@ exports.isSchemaValid = {
 	
 	shouldProduceAnErrorWhenFormatIsNotAsExpected : function(test) {
 		var properties = undefined;
-		schemaQueryAPi.isSatisfingSchema(properties, realSchema, function(err, correct) {
+		var schemas = {};
+		schemas[tableName] = realSchema;
+		schemaQueryAPi.isSatisfingSchema(properties, schemas, function(err, correct) {
 			test.notEqual(err, undefined, "Should throw error when when provide undentified as props");
 			//TODO Should be false
-			test.equal(true, correct, "Properties are correct, should match");
+			test.equal(false, correct, "Properties are correct, should match");
 			
 			properties = [];
+			properties[tableName] = [];
 			var tempRealSchema = extend([], realSchema);
 			delete tempRealSchema.properties;
-			schemaQueryAPi.isSatisfingSchema(properties, tempRealSchema, function(err, correct) {
+			schemas[tableName] = tempRealSchema;
+			schemaQueryAPi.isSatisfingSchema(properties, schemas, function(err, correct) {
 				test.notEqual(err, undefined, "Should throw error when schema wrong format");
 				//TODO Should be false
-				test.equal(true, correct, "Properties are not correct, should not match");
+				test.equal(false, correct, "Properties are not correct, should not match");
 				test.done();
 			});
 		});
