@@ -1,5 +1,6 @@
 #!/bin/bash
 
+nodeunit ExecutorUtilitiesTests.js
 nodeunit FilterBuilderTests.js
 nodeunit SchemeManipulationFuncsTests.js
 nodeunit SQLParserTests.js  
