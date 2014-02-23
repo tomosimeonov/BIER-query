@@ -1,7 +1,7 @@
 /**
  * New node file
  */
-//TODO FIX TO USE HASH MAPS
+// TODO FIX TO USE HASH MAPS
 var mockStorageApis = new require('./MockStorageAPIS').MockStorageAPIS();
 var builderBuilder = new require('../lib/builders/JoinQueryConfigurationBuilder');
 var messageBuilderBuilder = require('../lib/builders/QueryMessageBuilder');
@@ -97,29 +97,6 @@ var data_namespaceTwo = {
 	}
 };
 
-var data_namespaceThree = {
-	'01' : {
-		'id' : 1,
-		'num' : 3,
-		'three' : 3
-	},
-	'02' : {
-		'id' : 2,
-		'num' : 4,
-		'three' : 3
-	},
-	'03' : {
-		'id' : 3,
-		'num' : 3,
-		'three' : 3
-	},
-	'04' : {
-		'id' : 4,
-		'num' : 2,
-		'three' : 3
-	}
-};
-
 var mockLScan = function(namespace, callback) {
 	var passed = false;
 	switch (namespace) {
@@ -130,10 +107,6 @@ var mockLScan = function(namespace, callback) {
 	case 'two':
 		passed = true;
 		callback(data_namespaceTwo);
-		break;
-	case 'three':
-		passed = true;
-		callback(data_namespaceThree);
 		break;
 	}
 	if (!passed)
@@ -170,7 +143,7 @@ var buildEmitter = function(checker) {
 	return emiter;
 };
 
-exports.simpleTests = {
+exports.onlyLocalNodeExecutionTests = {
 	shouldNotReturnDataOnNoDataPassingFilter : function(test) {
 		var queryExecutor = new require('../lib/executors/JoinExecutor').JoinExecutor(mockStorageApis, statistics);
 
@@ -212,7 +185,7 @@ exports.simpleTests = {
 
 	},
 
-	shouldreturnDataOnDataPassingFilterIfAllIsLocal : function(test) {
+	shouldreturnDataOnDataPassingFilter : function(test) {
 		var queryExecutor = new require('../lib/executors/JoinExecutor').JoinExecutor(mockStorageApis, statistics);
 
 		var builder = builderBuilder.JoinQueryConfigurationBuilder();
@@ -227,57 +200,6 @@ exports.simpleTests = {
 
 		var broadcast = function(a, b, c) {
 
-		};
-		mockStorageApis.setBroadcast(broadcast);
-
-		var emiter = buildEmitter(function(data) {
-			test.equal(1, data.length, 'Should match data.');
-			test.done();
-		});
-
-		queryExecutor.formatSelectProperties(props, function(err, formatedSelectProperties) {
-			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setTimeout(4);
-			queryExecutor.executeQuery(builder.buildQueryConfig(), emiter);
-		});
-	},
-
-	shouldreturnDataOnDataPassingFilterIfPartOfItIsRemote : function(test) {
-		var queryExecutor = new require('../lib/executors/JoinExecutor').JoinExecutor(mockStorageApis, statistics);
-
-		var builder = builderBuilder.JoinQueryConfigurationBuilder();
-		builder = builder.setNamespaceOne(namespaceOne).setNamespaceTwo(namespaceTwo).setJoinPropertyOne('id')
-				.setJoinPropertyTwo('id').setFullType(0);
-
-		var filterPlan = {
-			'operator' : '=',
-			'left' : 'one.id',
-			'right' : 2
-		};
-		mockStorageApis.setLscan(function(namespace, callback) {
-			var passed = false;
-			switch (namespace) {
-			case 'one':
-				passed = true;
-				callback(data_namespaceOne);
-				break;
-			}
-			;
-			if (!passed)
-				callback({});
-		});
-
-		var localDataV = Object.keys(data_namespaceTwo).map(function(key) {
-			return data_namespaceTwo[key];
-		});
-		var message = messageBuilderBuilder.QueryMessageBuilder().setQueryId("test-join-0").setJoinType().setOrigin(
-				"test").setPayload(localDataV).setCustomPayloadType("SEC_DATA").buildMessage();
-
-		var broadcast = function(a, b, c) {
-			var mess = JSON.parse(a);
-			if (mess.payload !== undefined && mess.payloadType === PAYLOAD_TYPE_DATA_SEARCH)
-				setTimeout(function() {
-					queryExecutor.message(message);
-				}, 500);
 		};
 		mockStorageApis.setBroadcast(broadcast);
 
@@ -340,6 +262,60 @@ exports.simpleTests = {
 		queryExecutor.formatSelectProperties(props, function(err, formatedSelectProperties) {
 			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setMaxObjects(
 					2);
+			queryExecutor.executeQuery(builder.buildQueryConfig(), emiter);
+		});
+	}
+};
+
+exports.withRemoteNodeExecutionTests = {
+
+	shouldreturnDataOnDataPassingFilterIfPartOfItIsRemote : function(test) {
+		var queryExecutor = new require('../lib/executors/JoinExecutor').JoinExecutor(mockStorageApis, statistics);
+
+		var builder = builderBuilder.JoinQueryConfigurationBuilder();
+		builder = builder.setNamespaceOne(namespaceOne).setNamespaceTwo(namespaceTwo).setJoinPropertyOne('id')
+				.setJoinPropertyTwo('id').setFullType(0);
+
+		var filterPlan = {
+			'operator' : '=',
+			'left' : 'one.id',
+			'right' : 2
+		};
+		mockStorageApis.setLscan(function(namespace, callback) {
+			var passed = false;
+			switch (namespace) {
+			case 'one':
+				passed = true;
+				callback(data_namespaceOne);
+				break;
+			}
+			;
+			if (!passed)
+				callback({});
+		});
+
+		var localDataV = Object.keys(data_namespaceTwo).map(function(key) {
+			return data_namespaceTwo[key];
+		});
+		var message = messageBuilderBuilder.QueryMessageBuilder().setQueryId("test-join-0").setJoinType().setOrigin(
+				"test").setPayload(localDataV).setCustomPayloadType("SEC_DATA").buildMessage();
+
+		var broadcast = function(a, b, c) {
+			var mess = JSON.parse(a);
+			if (mess.payload !== undefined && mess.payloadType === PAYLOAD_TYPE_DATA_SEARCH)
+				setTimeout(function() {
+					queryExecutor.message(message);
+				}, 500);
+		};
+		mockStorageApis.setBroadcast(broadcast);
+
+		var emiter = buildEmitter(function(data) {
+			test.equal(1, data.length, 'Should match data.');
+			test.done();
+		});
+
+		queryExecutor.formatSelectProperties(props, function(err, formatedSelectProperties) {
+			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setTimeout(4);
 			queryExecutor.executeQuery(builder.buildQueryConfig(), emiter);
 		});
 	}

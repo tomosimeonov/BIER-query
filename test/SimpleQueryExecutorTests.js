@@ -49,7 +49,8 @@ var mockGetGlobal = function(namespace, callback) {
 	} else {
 		callback(undefined);
 	}
-}
+};
+
 var mockLScan = function(namespace, callback) {
 	callback(data);
 };
@@ -73,7 +74,7 @@ var buildEmitter = function(checker) {
 	return emiter;
 };
 
-exports.simpleTests = {
+exports.onlyLocalNodeExecutionTests = {
 	shouldNotReturnDataOnNoDataPassingFilter : function(test) {
 		var builder = builderBuilder.SimpleQueryConfigurationBuilder();
 		builder = builder.setNamespace(namespace).setDestinations([]);
@@ -197,27 +198,41 @@ exports.simpleTests = {
 			queryExecutor.executeQuery(builder.buildQueryConfig(), emiter);
 		});
 	}
-	,
-//	shouldAggregationAndPropSameAsTheAggregationIfPartOfItIsRemote : function(test) {
-//		var builder = builderBuilder.SimpleQueryConfigurationBuilder();
-//		builder = builder.setNamespace(namespace).setDestinations([]);
-//
-//		var emiter = buildEmitter(function(data) {
-//			test.equal(4, Object.keys(data).length, 'Should return 4 objects.');
-//			test.equal(3, data[0]['AVR(num)'], 'Should avr to 3');
-//			test.equal(4, data[1]['num'], 'Should equal to 4');
-//			test.done();
-//		});
-//
-//		var filterPlan = {};
-//		
-//		
-//		queryExecutor.formatSelectProperties([ 'num', 'AVR(num)' ], function(err, formatedSelectProperties) {
-//			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setTimeout(1);
-//			queryExecutor.executeQuery(builder.buildQueryConfig(), emiter);
-//		});
-//	},
-	shouldreturnDataOnDataPassingFilterIfPartOfItIsRemote : function(test) {
+
+};
+
+exports.withRemoteNodeExecutionTests = {
+	shouldAggregationAndPropSameAsTheAggregation : function(test) {
+		var builder = builderBuilder.SimpleQueryConfigurationBuilder();
+		builder = builder.setNamespace(namespace).setDestinations([]);
+
+		var emiter = buildEmitter(function(data) {
+			test.equal(4, Object.keys(data).length, 'Should return 4 objects.');
+			test.equal(3, data[0]['AVR(num)'], 'Should avr to 3');
+			test.equal(4, data[1]['num'], 'Should equal to 4');
+			test.done();
+		});
+
+		var filterPlan = {};
+
+		var message = require('../lib/builders/QueryMessageBuilder').QueryMessageBuilder().setQueryId("test-simple-0")
+				.setSimpleType().setOrigin("test").setPayload(data).setPayloadTypeData().buildMessage();
+
+		var broadcast = function(a, b, c) {
+			var mess = JSON.parse(a);
+			if (mess.payload !== undefined && mess.payloadType === "DATA")
+				setTimeout(function() {
+					queryExecutor.message(message);
+				}, 500);
+		};
+		mockStorageApis.setBroadcast(broadcast);
+
+		queryExecutor.formatSelectProperties([ 'num', 'AVR(num)' ], function(err, formatedSelectProperties) {
+			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setTimeout(1);
+			queryExecutor.executeQuery(builder.buildQueryConfig(), emiter);
+		});
+	},
+	shouldreturnDataOnDataPassingFilter : function(test) {
 		var builder = builderBuilder.SimpleQueryConfigurationBuilder();
 		builder = builder.setNamespace(namespace).setDestinations([]);
 
@@ -232,8 +247,8 @@ exports.simpleTests = {
 			'right' : 0
 		};
 
-		var message = require('../lib/builders/QueryMessageBuilder').QueryMessageBuilder().setQueryId("test-simple-0").setSimpleType()
-				.setOrigin("test").setPayload(data).setPayloadTypeData().buildMessage();
+		var message = require('../lib/builders/QueryMessageBuilder').QueryMessageBuilder().setQueryId("test-simple-0")
+				.setSimpleType().setOrigin("test").setPayload(data).setPayloadTypeData().buildMessage();
 
 		var broadcast = function(a, b, c) {
 			var mess = JSON.parse(a);
@@ -249,5 +264,4 @@ exports.simpleTests = {
 			queryExecutor.executeQuery(builder.buildQueryConfig(), emiter);
 		});
 	}
-
 };
