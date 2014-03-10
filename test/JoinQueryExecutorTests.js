@@ -213,7 +213,36 @@ exports.onlyLocalNodeExecutionTests = {
 			queryExecutor.executeQuery(builder.buildQueryConfig(), emiter);
 		});
 	},
+	shouldreturnDataOnDataPassingFilterWithProjection : function(test) {
+		var queryExecutor = new require('../lib/executors/JoinExecutor').JoinExecutor(mockStorageApis, statistics);
 
+		var propsL = ['one.id'];
+		var builder = builderBuilder.JoinQueryConfigurationBuilder();
+		builder = builder.setNamespaceOne(namespaceOne).setNamespaceTwo(namespaceTwo).setJoinPropertyOne('id')
+				.setJoinPropertyTwo('id').setFullType(0);
+
+		var filterPlan = {
+			'operator' : '=',
+			'left' : 'one.id',
+			'right' : 2
+		};
+
+		var broadcast = function(a, b, c) {
+
+		};
+		mockStorageApis.setBroadcast(broadcast);
+
+		var emiter = buildEmitter(function(data) {
+			test.equal(1, data.length, 'Should match data.');
+			test.equal(1,Object.keys(data[0]).length, 'Should use projection');
+			test.done();
+		});
+
+		queryExecutor.formatSelectProperties(propsL, function(err, formatedSelectProperties) {
+			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setTimeout(4);
+			queryExecutor.executeQuery(builder.buildQueryConfig(), emiter);
+		});
+	},
 	shouldReturnDataOnObjectCountStopper : function(test) {
 		var queryExecutor = new require('../lib/executors/JoinExecutor').JoinExecutor(mockStorageApis, statistics);
 
