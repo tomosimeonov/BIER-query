@@ -116,7 +116,27 @@ exports.onlyLocalNodeExecutionTests = {
 			queryExecutor.executeQuery(builder.buildQueryConfig(), emiter);
 		});
 	},
+	shouldreturnDataOnDataPassingFilterWithProjection : function(test) {
+		var builder = builderBuilder.SimpleQueryConfigurationBuilder();
+		builder = builder.setNamespace(namespace).setDestinations([]);
 
+		var emiter = buildEmitter(function(data) {
+			test.equal(1, data.length, 'Should not match data.');
+			test.equal(1,Object.keys(data[0]).length, 'Should use projection');
+			test.done();
+		});
+
+		var filterPlan = {
+			'operator' : '=',
+			'left' : 'id',
+			'right' : 2
+		};
+
+		queryExecutor.formatSelectProperties(['id'], function(err, formatedSelectProperties) {
+			builder = builder.setFilterPlan(filterPlan).setFormattedProperties(formatedSelectProperties).setTimeout(1);
+			queryExecutor.executeQuery(builder.buildQueryConfig(), emiter);
+		});
+	},
 	shouldReturnDataOnObjectCountStopper : function(test) {
 		var builder = builderBuilder.SimpleQueryConfigurationBuilder();
 		builder = builder.setNamespace(namespace).setDestinations([]);
